@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Registration</title>
+</head>
+<body>
+
+<h2>Student Registration Form</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- USER DETAILS -->
+    <h3>User Info</h3>
+    <input type="text" name="username" placeholder="Username" required><br><br>
+    <input type="password" name="password" placeholder="Password" required><br><br>
+    <input type="text" name="phone" placeholder="Phone"><br><br>
+
+    <!-- STUDENT DETAILS -->
+    <h3>Student Details</h3>
+    <input type="text" name="roll_number" placeholder="Roll Number" required><br><br>
+    <input type="number" name="year" placeholder="Year"><br><br>
+    <input type="file" name="img"><br><br>
+    <input type="text" name="aadhaar_number" placeholder="Aadhaar Number"><br><br>
+    <input type="date" name="date_of_birth"><br><br>
+    <input type="text" name="mother_name" placeholder="Mother Name"><br><br>
+    <input type="text" name="father_name" placeholder="Father Name"><br><br>
+    <textarea name="address" placeholder="Address"></textarea><br><br>
+
+    <!-- DYNAMIC DROPDOWNS -->
+    <h3>Academic Info</h3>
+
+    <label>Course:</label><br>
+    <select id="course" name="course">
+        <option value="">Select Course</option>
+        {% for course in courses %}
+            <option value="{{ course.id }}">{{ course.name }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <label>Department:</label><br>
+    <select id="department" name="department">
+        <option value="">Select Department</option>
+    </select><br><br>
+
+    <label>Semester:</label><br>
+    <select id="semester" name="semester">
+        <option value="">Select Semester</option>
+    </select><br><br>
+
+    <label>Section:</label><br>
+    <select id="section" name="section">
+        <option value="">Select Section</option>
+    </select><br><br>
+
+    <button type="submit">Submit</button>
+</form>
+
+<!-- JAVASCRIPT FOR DYNAMIC DROPDOWN -->
+<script>
+
+// Course → Department
+document.getElementById("course").addEventListener("change", function () {
+    let courseId = this.value;
+
+    fetch(`/ajax/load-departments/?course_id=${courseId}`)
+        .then(response => response.json())
+        .then(data => {
+            let dept = document.getElementById("department");
+            dept.innerHTML = '<option>Select Department</option>';
+
+            data.forEach(function (item) {
+                dept.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+            });
+        });
+});
+
+
+// Department → Semester
+document.getElementById("department").addEventListener("change", function () {
+    let deptId = this.value;
+
+    fetch(`/ajax/load-semesters/?dept_id=${deptId}`)
+        .then(response => response.json())
+        .then(data => {
+            let sem = document.getElementById("semester");
+            sem.innerHTML = '<option>Select Semester</option>';
+
+            data.forEach(function (item) {
+                sem.innerHTML += `<option value="${item.id}">${item.number}</option>`;
+            });
+        });
+});
+
+
+document.getElementById("semester").addEventListener("change", function () {
+    let semId = this.value;
+
+    fetch(`/ajax/load-sections/?sem_id=${semId}`)
+        .then(response => response.json())
+        .then(data => {
+            let sec = document.getElementById("section");
+            sec.innerHTML = '<option>Select Section</option>';
+
+            data.forEach(function (item) {
+                sec.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+            });
+        });
+});
+
+</script>
+
+</body>
+</html>

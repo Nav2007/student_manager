@@ -12,6 +12,37 @@ class CustomUser(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     phone = models.CharField(max_length=15, blank=True)
 
+
+
+class Course(models.Model):
+    name = models.CharField(max_length=100)   
+
+    def __str__(self):
+        return self.name
+
+
+class Department(models.Model):
+    name = models.CharField(max_length=100)   
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.name} ({self.course.name})"
+
+
+class Semester(models.Model):
+    number = models.IntegerField() 
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Sem {self.number} - {self.department.name}"
+
+
+class Section(models.Model):
+    name = models.CharField(max_length=10) 
+    semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.name} - Sem {self.semester.number}"
 class Student(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)#instead of writing CustomUser we specify it in the settings.py and use it using settings.authuser
     roll_number = models.CharField(max_length=20,unique=True)
@@ -24,6 +55,10 @@ class Student(models.Model):
     address = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
+    section = models.ForeignKey(Section, on_delete=models.CASCADE)
     def __str__(self):
         return f"{self.user.username} (Roll: {self.roll_number})"
 
@@ -39,8 +74,5 @@ class Teacher(models.Model):
     address = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    def __str__(self):#useful in foreign key dropdowns and in admin panel
+    def __str__(self):
         return f"{self.user.username} (Emp: {self.employee_id})"
-
-
-
